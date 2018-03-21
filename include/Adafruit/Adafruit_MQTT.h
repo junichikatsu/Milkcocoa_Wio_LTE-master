@@ -32,7 +32,7 @@
 //#define MQTT_DEBUG
 
 // Set where debug messages will be printed.
-#define DEBUG_PRINTER Serial
+#define DEBUG_PRINTER SerialUSB
 
 // Define actual debug output functions when necessary.
 #ifdef MQTT_DEBUG
@@ -68,7 +68,7 @@
 // Largest full packet we're able to send.
 // Need to be able to store at least ~90 chars for a connect packet with full
 // 23 char client ID.
-#define MAXBUFFERSIZE (125)
+#define MAXBUFFERSIZE (1024)
 
 #define MQTT_CONN_USERNAMEFLAG 0x80
 #define MQTT_CONN_PASSWORDFLAG 0x40

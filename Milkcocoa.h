@@ -56,7 +56,7 @@ class MilkcocoaSubscriber {
   public:
     Adafruit_MQTT_Subscribe *mqtt_sub;
     GeneralFunction cb;
-    char topic[100];
+    char topic[256];
     MilkcocoaSubscriber(GeneralFunction _cb);
     void set_mqtt_sub(Adafruit_MQTT_Subscribe *_mqtt_sub);
 };
@@ -76,7 +76,7 @@ class Milkcocoa {
 
 private:
   const char *app_id;
-  char session[128];
+  char session[1024];
   Adafruit_MQTT_Client *mqtt;
   MilkcocoaSubscriber *milkcocoaSubscribers[MILKCOCOA_SUBSCRIBERS];
 };

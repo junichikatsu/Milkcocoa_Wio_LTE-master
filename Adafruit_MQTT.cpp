@@ -215,12 +215,21 @@ Adafruit_MQTT_Subscribe *Adafruit_MQTT::readSubscription(int16_t timeout) {
 
   // Check if data is available to read.
   uint16_t len = readPacket(buffer, MAXBUFFERSIZE, timeout, true); // return one full packet
+
+  int m_heder_p = 2;
+
   if (!len)
     return NULL;  // No data available, just quit.
   DEBUG_PRINTBUFFER(buffer, len);
 
+  if(buffer[1] & 0x80)  m_heder_p++;
+
   // Parse out length of packet.
-  topiclen = buffer[3];
+  topiclen = buffer[m_heder_p];
+  m_heder_p++;
+  topiclen <<= 8;
+  topiclen |= buffer[m_heder_p];
+  m_heder_p++;
   DEBUG_PRINT(F("Looking for subscription len ")); DEBUG_PRINTLN(topiclen);
 
   // Find subscription associated with this packet.
@@ -232,7 +241,7 @@ Adafruit_MQTT_Subscribe *Adafruit_MQTT::readSubscription(int16_t timeout) {
         continue;
       // Stop if the subscription topic matches the received topic. Be careful
       // to make comparison case insensitive.
-      if (strncasecmp((char*)buffer+4, subscriptions[i]->topic, topiclen) == 0) {
+      if (strncasecmp((char*)buffer+m_heder_p, subscriptions[i]->topic, topiclen) == 0) {
         DEBUG_PRINT(F("Found sub #")); DEBUG_PRINTLN(i);
         break;
       }
@@ -244,15 +253,16 @@ Adafruit_MQTT_Subscribe *Adafruit_MQTT::readSubscription(int16_t timeout) {
   memset(subscriptions[i]->lastread, 0, SUBSCRIPTIONDATALEN);
 
   datalen = len - topiclen - 4;
+
+  if(buffer[1] & 0x80)  datalen--;
   // if (datalen > SUBSCRIPTIONDATALEN) {
   //   datalen = SUBSCRIPTIONDATALEN-1; // cut it off
   // }
   // extract out just the data, into the subscription object itself
-  memcpy(subscriptions[i]->lastread, buffer+4+topiclen, datalen);
+  memcpy(subscriptions[i]->lastread, buffer+m_heder_p+topiclen, datalen);
   subscriptions[i]->datalen = datalen;
   DEBUG_PRINT(F("Data len: ")); DEBUG_PRINTLN(datalen);
   DEBUG_PRINT(F("Data: ")); DEBUG_PRINTLN((char *)subscriptions[i]->lastread);
-
   // return the valid matching subscription
   return subscriptions[i];
 }

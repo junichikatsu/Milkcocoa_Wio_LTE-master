@@ -163,7 +163,7 @@ bool Milkcocoa::loop(uint16_t timeout) {
     return false;
   }
   Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt->readSubscription(1000))) {
+  while ((subscription = mqtt->readSubscription(3000))) {
     for (uint8_t i=0; i<MILKCOCOA_SUBSCRIBERS; i++) {
       if(milkcocoaSubscribers[i] == 0) continue;
       if (subscription == (milkcocoaSubscribers[i]->mqtt_sub) ) {

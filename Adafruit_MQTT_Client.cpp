@@ -66,12 +66,20 @@ uint16_t Adafruit_MQTT_Client::readPacket(uint8_t *buffer, uint8_t maxlen,
       if (len == maxlen) {  // we read all we want, bail
         DEBUG_PRINT(F("Read packet:\t"));
         DEBUG_PRINTBUFFER(buffer, len);
+
         return len;
       }
 
       // special case where we just one one publication packet at a time
       if (checkForValidPubPacket) {
-        if ((buffer[0] == (MQTT_CTRL_PUBLISH << 4)) && (buffer[1] == len-2)) {
+        uint32_t size;
+        if(buffer[1] & 0x80){
+          size = (buffer[1] & 0x80) + 128 * buffer[2];
+        }
+        else{
+          size = buffer[1];
+        }
+        if ((buffer[0] == (MQTT_CTRL_PUBLISH << 4)) && (size == len-2)) {
           // oooh a valid publish packet!
           DEBUG_PRINT(F("Read PUBLISH packet:\t"));
           DEBUG_PRINTBUFFER(buffer, len);
@@ -82,6 +90,7 @@ uint16_t Adafruit_MQTT_Client::readPacket(uint8_t *buffer, uint8_t maxlen,
     timeout -= MQTT_CLIENT_READINTERVAL_MS;
     delay(MQTT_CLIENT_READINTERVAL_MS);
   }
+
   return len;
 }
 
